@@ -10,6 +10,7 @@ const App = () => {
     <BrowserRouter>
       <GlobalProvider>
         <div className="container">
+          <h1>Task Manager</h1>
           <NavBar />
           <Routes>
             <Route path="/" element={<TaskList />} />
