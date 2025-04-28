@@ -51,8 +51,28 @@ const useTasks = () => {
   }
 
 
-  function removeTask() {
-    // da implementare
+  async function removeTask(id) {
+    try {
+      const response = await fetch(`${APIendpoint}/tasks/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Errore nella richiesta API');
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
+        console.log('Task rimosso:', id);
+      } else {
+        throw new Error(data.message || 'Qualcosa è andato storto...');
+      }
+    } catch (error) {
+      console.error('Errore nella rimozione del task:', error.message);
+      throw error;
+    }
   }
 
   function updateTask() {

@@ -1,6 +1,7 @@
 //form per aggiungere nuovo task
 import { useState, useRef } from "react"
-import useTasks from "../hook/useTasks"
+import { useGlobalContext } from "../context/GlobalContext";
+import { useNavigate } from "react-router-dom";
 
 const AddTask = () => {
 
@@ -8,9 +9,10 @@ const AddTask = () => {
   const [titleError, setTitleError] = useState("");
   const refDescription = useRef();
   const refStatus = useRef();
-  const { addTask } = useTasks();
+  const { addTask } = useGlobalContext();
+  const navigate = useNavigate();
 
-  const symbols = "!@#$%^&*()-_=+[]{}|;:'\\\",.<>?/`~";
+  const symbols = "!@#$%^&*()-_=+[]{}|;:\\\",.<>?/`~";
 
   const validateTitle = (title) => {
     if (title.length < 3) {
@@ -46,13 +48,11 @@ const AddTask = () => {
       console.log('Sending task:', task);
       await addTask(task);
       alert("Task aggiunto con successo!");
-      setTitle("");
-      refDescription.current.value = "";
-      refStatus.current.value = "To do";
+
+      navigate("/");
     } catch (error) {
       alert("Errore nell'aggiunta del task: " + error.message);
     }
-    // setTitleError("");
   }
 
   return (
