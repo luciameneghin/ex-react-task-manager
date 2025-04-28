@@ -1,5 +1,6 @@
 //form per aggiungere nuovo task
 import { useState, useRef } from "react"
+import useTasks from "../hook/useTasks"
 
 const AddTask = () => {
 
@@ -7,6 +8,7 @@ const AddTask = () => {
   const [titleError, setTitleError] = useState("");
   const refDescription = useRef();
   const refStatus = useRef();
+  const { addTask } = useTasks();
 
   const symbols = "!@#$%^&*()-_=+[]{}|;:'\\\",.<>?/`~";
 
@@ -23,30 +25,34 @@ const AddTask = () => {
     return null;
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
 
     const error = validateTitle(title);
+    setTitleError("");
 
     if (error) {
       setTitleError(error);
       return;
     }
-    setTitleError("");
-
-    const description = refDescription.current.value;
-    const status = refStatus.current.value;
 
     const task = {
       title,
-      description,
-      status
+      description: refDescription.current.value,
+      status: refStatus.current.value,
     };
-    console.log('Nuova task:', task);
-    setTitle("");
-    refDescription.current.value = "";
-    refStatus.current.value = "to do";
-    setTitleError("");
+
+    try {
+      console.log('Sending task:', task);
+      await addTask(task);
+      alert("Task aggiunto con successo!");
+      setTitle("");
+      refDescription.current.value = "";
+      refStatus.current.value = "To do";
+    } catch (error) {
+      alert("Errore nell'aggiunta del task: " + error.message);
+    }
+    // setTitleError("");
   }
 
   return (
@@ -85,9 +91,9 @@ const AddTask = () => {
             name="status"
             ref={refStatus}
             className="form-select">
-            <option value="to do">To do (default)</option>
-            <option value="doing">Doing</option>
-            <option value="done">Done</option>
+            <option value="To do">To do</option>
+            <option value="Doing">Doing</option>
+            <option value="Done">Done</option>
           </select>
         </section>
 

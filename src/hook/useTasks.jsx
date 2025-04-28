@@ -21,9 +21,35 @@ const useTasks = () => {
   }, [])
 
 
-  function addTask() {
-    // da implementare
+  async function addTask(task) {
+    try {
+      const response = await fetch(`${APIendpoint}/tasks`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+
+        body: JSON.stringify(task),
+      });
+
+      if (!response.ok) {
+        throw new Error('Errore nella richiesta API');
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        setTasks((prevTasks) => [...prevTasks, data.task]);
+        console.log('Task aggiunto:', data.task);
+      } else {
+        throw new Error(data.message || 'Qualcosa è andato storto...');
+      }
+    } catch (error) {
+      console.error('Errore nell\'aggiunta del task:', error.message);
+      throw error;
+    }
   }
+
 
   function removeTask() {
     // da implementare
