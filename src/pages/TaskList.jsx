@@ -1,7 +1,7 @@
 //elenco task
 import { useGlobalContext } from "../context/GlobalContext"
 import TaskRow from "../components/TaskRow"
-import { useState, useMemo } from "react"
+import { useState, useMemo, useCallback } from "react"
 
 const TaskList = () => {
   const { tasks } = useGlobalContext()
@@ -9,6 +9,17 @@ const TaskList = () => {
   const [sortBy, setSortBy] = useState("createdAt")
   const [sortOrder, setSortOrder] = useState(1)
   const [searchQuery, setSearchQuery] = useState("")
+  const [timeoutId, setTimeoutId] = useState(null)
+
+  const debounce = useCallback((func, delay) => {
+    if (timeoutId) {
+      clearTimeout(timeoutId)
+    }
+    const id = setTimeout(() => {
+      func()
+    }, delay)
+    setTimeoutId(id)
+  }, [timeoutId]);
 
   const handleSort = (column) => {
     if (sortBy === column) {
@@ -25,7 +36,12 @@ const TaskList = () => {
       'Doing': 1,
       'Done': 2,
     }
-    return [...tasks].sort((a, b) => {
+
+    const filteredTasks = tasks.filter(task => {
+      return task.title.toLowerCase().includes(searchQuery.toLowerCase())
+    })
+
+    return [...filteredTasks].sort((a, b) => {
       if (sortBy === "status") {
         return (statusOrder[a.status] - statusOrder[b.status]) * sortOrder
       } else if (sortBy === "createdAt") {
@@ -34,12 +50,20 @@ const TaskList = () => {
         return a.title.localeCompare(b.title) * sortOrder
       }
     })
-  }, [tasks, sortBy, sortOrder])
+  }, [tasks, sortBy, sortOrder, searchQuery])
+
 
   return (
     <div>
       <h2>Lista dei Task</h2>
-
+      <div className="d-flex justify-content-around my-4">
+        <input
+          type="text"
+          placeholder="Cerca la task in base al suo nome..."
+          onChange={(e) => debounce(() => setSearchQuery(e.target.value), 500)}
+          className="form-control w-75"
+        />
+      </div>
       {tasks.length === 0 ? (
         <p>Nessun task disponibile.</p>
       ) : (
