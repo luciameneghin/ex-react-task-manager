@@ -75,8 +75,41 @@ const useTasks = () => {
     }
   }
 
-  function updateTask() {
-    // da implementare
+  async function updateTask(task) {
+    try {
+      console.log('Task being sent:', JSON.stringify(task));
+      const response = await fetch(`${APIendpoint}/tasks/${task.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(task),
+      });
+
+      console.log('Response status:', response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.log('Error data from API:', errorData);
+        throw new Error('Errore nella richiesta API');
+      }
+
+
+      const data = await response.json();
+      console.log('data:', data);
+
+      if (data.success) {
+        setTasks((prevTasks) =>
+          prevTasks.map((t) => (t.id === task.id ? data.task : t))
+        );
+        console.log('success: true, task:', data.task);
+      } else {
+        throw new Error(data.message || 'Qualcosa è andato storto...');
+      }
+    } catch (error) {
+      console.error('success: false, message:', error.message);
+      throw error;
+    }
   }
 
   return {
